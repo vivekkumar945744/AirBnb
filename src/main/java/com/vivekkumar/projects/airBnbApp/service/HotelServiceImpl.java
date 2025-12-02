@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class HotelServiceImpl implements HodelService {
+public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
@@ -33,8 +33,40 @@ public class HotelServiceImpl implements HodelService {
         log.info("Getting the hotel with ID: {}", id);
         Hotel hotel = hotelRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with ID: {}" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with ID: " + id));
         return modelMapper.map(hotel, HotelDto.class);
     }
+
+    @Override
+    public HotelDto updateHotelById(Long id, HotelDto hotelDto) {
+        log.info("Updating the hotel with ID: {}", id);
+        Hotel hotel = hotelRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with ID: " + id));
+        modelMapper.map(hotelDto, hotel);
+        hotel.setId(id);
+        hotel = hotelRepository.save(hotel);
+        return modelMapper.map(hotel, HotelDto.class);
+    }
+
+    @Override
+    public Void deleteHotelById(Long id) {
+        boolean exist = hotelRepository.existsById(id);
+        if (!exist) throw new ResourceNotFoundException("Hotel not found with ID: " + id);
+
+        hotelRepository.deleteById(id);
+        return null;
+    }
+
+    @Override
+    public void adtivateHotel(Long hotelId) {
+        log.info("Activating the hotel with ID: {}", hotelId);
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with ID: " + hotelId));
+
+        hotel.setActive(true);
+    }
+
+
 }
 
